@@ -8,6 +8,7 @@
  #define NUM_SECTORS 100
  #define ENTRIES_PER_SECTOR 25
  #define DATA_SIZE 504
+ #define MAX_OPEN_FILES 10
 
  //Represents one itme inside a directory
  struct dirEntry{
@@ -41,13 +42,24 @@
     struct nodeType *link;//Pointer to next free sector node
  };
 
+ //Represents a file currently opened by the user
+ struct openFileEntry{
+    int used;
+    int directorySector;
+    int directoryEntry;
+    int position;
+ };
+
  extern union block sector [NUM_SECTORS];
  extern struct nodeType *freeList;
+ extern struct openFileEntry openFiles[MAX_OPEN_FILES];
 
  void initDir(int sectorNumber, int back, int frwd);//Initizalizes a sector as a directory
  void buildList(void);//Creates initial free sector list sectors 1-99
  int Remove(void);//Removes an available sector from free list and returns its number
  void Insert(int sectorNumber);//Adds a released sector back into the free list
  void releaseList(void);//Frees all the linked list nodes when program exits
+
+ int openFile(const char *name);//Opens a file in the root directory and returns a handle
 
  #endif
