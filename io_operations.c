@@ -43,3 +43,21 @@ int openFile(const char *name){
     printf("OPEN failed: maximum number of open files reached.\n");
     return -1;
 }
+
+/*
+ * Closes an active open-file handle and makes its table entry available
+ * for another OPEN operation.
+ */
+int closeFile(int handle){
+    if(handle < 0 || handle >= MAX_OPEN_FILES || !openFiles[handle].used){
+        printf("CLOSE failed: invalid file handle.\n");
+        return -1;
+    }
+
+    openFiles[handle].used = 0;
+    openFiles[handle].directorySector = 0;
+    openFiles[handle].directoryEntry = 0;
+    openFiles[handle].position = 0;
+    printf("Closed file handle %d.\n", handle);
+    return 0;
+}

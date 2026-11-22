@@ -61,5 +61,6 @@
  void releaseList(void);//Frees all the linked list nodes when program exits
 
  int openFile(const char *name);//Opens a file in the root directory and returns a handle
+ int closeFile(int handle);//Closes an open file handle
 
  #endif
