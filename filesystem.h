@@ -62,5 +62,6 @@
 
  int openFile(const char *name);//Opens a file in the root directory and returns a handle
  int closeFile(int handle);//Closes an open file handle
+ int writeFile(int handle, const char *data);//Writes data at the current file position
 
  #endif
