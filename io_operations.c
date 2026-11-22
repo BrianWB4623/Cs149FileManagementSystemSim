@@ -151,3 +151,41 @@ int writeFile(int count, const char *data){
     printf("Wrote %d bytes to '%s'.\n", count, file->name);
     return count;
 }
+
+/* Reads up to count bytes from the current file position. */
+int readFile(int count, char *output, int outputSize){
+    if(!currentFile.isOpen){
+        printf("READ failed: no file is open.\n");
+        return -1;
+    }
+    if(currentFile.mode != 'I' && currentFile.mode != 'U'){
+        printf("READ failed: file is not open for reading.\n");
+        return -1;
+    }
+    if(count < 0 || output == NULL || outputSize <= 0){
+        printf("READ failed: invalid count or output buffer.\n");
+        return -1;
+    }
+
+    struct dirEntry *file =
+        &sector[currentFile.directorySector].directory.dir[
+            currentFile.directoryEntry];
+    int remaining = file->size - currentFile.position;
+    int bytesToRead = count < remaining ? count : remaining;
+    if(bytesToRead >= outputSize){
+        bytesToRead = outputSize - 1;
+    }
+
+    for(int i = 0; i < bytesToRead; i++){
+        int absolutePosition = currentFile.position + i;
+        int blockIndex = absolutePosition / DATA_SIZE;
+        int offset = absolutePosition % DATA_SIZE;
+        int dataSector = dataSectorAt(file->link, blockIndex);
+        output[i] = sector[dataSector].data.userdata[offset];
+    }
+
+    output[bytesToRead] = '\0';
+    currentFile.position += bytesToRead;
+    printf("Read %d bytes from '%s'.\n", bytesToRead, file->name);
+    return bytesToRead;
+}
