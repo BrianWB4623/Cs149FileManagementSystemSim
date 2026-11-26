@@ -189,3 +189,24 @@ int readFile(int count, char *output, int outputSize){
     printf("Read %d bytes from '%s'.\n", bytesToRead, file->name);
     return bytesToRead;
 }
+
+/* Moves the current file position without changing the file size. */
+int seekFile(int position){
+    if(!currentFile.isOpen){
+        printf("SEEK failed: no file is open.\n");
+        return -1;
+    }
+
+    struct dirEntry *file =
+        &sector[currentFile.directorySector].directory.dir[
+            currentFile.directoryEntry];
+    if(position < 0 || position > file->size){
+        printf("SEEK failed: position must be between 0 and %d.\n",
+               file->size);
+        return -1;
+    }
+
+    currentFile.position = position;
+    printf("File position moved to %d.\n", position);
+    return 0;
+}

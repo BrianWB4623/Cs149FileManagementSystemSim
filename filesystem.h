@@ -58,5 +58,6 @@ int openFile(char mode, const char *name);
 int closeFile(void);
 int writeFile(int count, const char *data);
 int readFile(int count, char *output, int outputSize);
+int seekFile(int position);
 
 #endif
