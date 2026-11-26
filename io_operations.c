@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "filesystem.h"
 
@@ -209,4 +210,87 @@ int seekFile(int position){
     currentFile.position = position;
     printf("File position moved to %d.\n", position);
     return 0;
+}
+
+/* Processes one command. Returns 1 when the EXIT command is entered. */
+int processCommand(char *line){
+    if(line == NULL){
+        return 0;
+    }
+
+    line[strcspn(line, "\n")] = '\0';
+    if(strcmp(line, "EXIT") == 0){
+        return 1;
+    }
+    if(strcmp(line, "CLOSE") == 0){
+        closeFile();
+        return 0;
+    }
+
+    char mode;
+    char name[9];
+    if(sscanf(line, "OPEN %c %8s", &mode, name) == 2){
+        openFile(mode, name);
+        return 0;
+    }
+
+    int count;
+    if(sscanf(line, "READ %d", &count) == 1){
+        if(count < 0){
+            printf("READ failed: byte count cannot be negative.\n");
+            return 0;
+        }
+        char *output = malloc((size_t)count + 1);
+        if(output == NULL){
+            printf("READ failed: unable to allocate output buffer.\n");
+            return 0;
+        }
+        int result = readFile(count, output, count + 1);
+        if(result >= 0){
+            printf("Data read: %s\n", output);
+        }
+        free(output);
+        return 0;
+    }
+
+    if(sscanf(line, "SEEK %d", &count) == 1){
+        seekFile(count);
+        return 0;
+    }
+
+    if(strncmp(line, "WRITE ", 6) == 0){
+        char *numberStart = line + 6;
+        char *dataStart;
+        long requested = strtol(numberStart, &dataStart, 10);
+        if(dataStart == numberStart || requested < 0 || requested > 32767){
+            printf("Usage: WRITE <byte count> <data>\n");
+            return 0;
+        }
+        if(*dataStart == ' '){
+            dataStart++; /* Remove the separator after the byte count. */
+        }
+        if((int)strlen(dataStart) < requested){
+            printf("WRITE failed: fewer data bytes were provided than requested.\n");
+            return 0;
+        }
+        writeFile((int)requested, dataStart);
+        return 0;
+    }
+
+    printf("Unknown command.\n");
+    return 0;
+}
+
+/* Runs the Member 3 command loop until EXIT is entered. */
+void commandLoop(void){
+    char line[512];
+    while(1){
+        printf("fs> ");
+        if(fgets(line, sizeof(line), stdin) == NULL){
+            break;
+        }
+        if(processCommand(line)){
+            break;
+        }
+    }
 }

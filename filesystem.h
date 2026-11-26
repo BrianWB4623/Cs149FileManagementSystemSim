@@ -59,5 +59,7 @@ int closeFile(void);
 int writeFile(int count, const char *data);
 int readFile(int count, char *output, int outputSize);
 int seekFile(int position);
+int processCommand(char *line);
+void commandLoop(void);
 
 #endif
